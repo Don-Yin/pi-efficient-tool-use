@@ -1,0 +1,47 @@
+{
+	"name": "pi-efficient-tool-use",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Pi extension that reminds the agent to batch independent lookups, shows how often that worked, and fixes a few wasteful tool calls where they happen.",
+	"license": "MIT",
+	"author": "Don Yin",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Don-Yin/pi-efficient-tool-use.git"
+	},
+	"type": "module",
+	"engines": {
+		"node": ">=22.18"
+	},
+	"bin": {
+		"pi-efficient-tool-use": "bin/stats.mjs"
+	},
+	"files": [
+		"src/",
+		"bin/",
+		"vendor/",
+		"README.md",
+		"LICENSE"
+	],
+	"scripts": {
+		"test": "node --test tests/*.test.ts"
+	},
+	"keywords": [
+		"pi-package",
+		"pi",
+		"tools",
+		"efficiency"
+	],
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		],
+		"image": "https://raw.githubusercontent.com/Don-Yin/pi-efficient-tool-use/main/assets/demo.png"
+	},
+	"piLocal": {
+		"category": "code-quality"
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*"
+	}
+}

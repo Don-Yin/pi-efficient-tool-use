@@ -1,0 +1,4 @@
+/node_modules/
+# local-only material: plot sources and data
+/docs/*
+!/docs/README.*.md
