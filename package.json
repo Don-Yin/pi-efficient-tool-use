@@ -14,12 +14,10 @@
 		"node": ">=22.18"
 	},
 	"bin": {
-		"pi-efficient-tool-use": "bin/stats.mjs"
+		"pi-efficient-tool-use": "src/stats.mjs"
 	},
 	"files": [
 		"src/",
-		"bin/",
-		"vendor/",
 		"README.md",
 		"LICENSE"
 	],

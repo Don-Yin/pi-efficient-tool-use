@@ -47,7 +47,7 @@ export class ToolUseTracker {
 				? [value.name ?? value.toolName ?? "unknown"]
 				: [];
 		});
-		// The same measure as bin/stats.mjs: did the next tool batch after a reminder hold several calls?
+		// The same measure as src/stats.mjs: did the next tool batch after a reminder hold several calls?
 		if (this.awaitingNext && tools.length) {
 			if (tools.length > 1) this.batchedAfter++;
 			this.awaitingNext = false;

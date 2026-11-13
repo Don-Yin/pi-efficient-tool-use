@@ -6,7 +6,7 @@ import { createReadStream, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
-import { BATCH_REMINDER, DISCOVERY } from "../src/discovery.js";
+import { BATCH_REMINDER, DISCOVERY } from "./discovery.js";
 
 const root = process.argv[2] ?? join(homedir(), ".pi/agent/sessions");
 const files = readdirSync(root, { recursive: true }).filter(name => name.endsWith(".jsonl")).map(name => join(root, name));

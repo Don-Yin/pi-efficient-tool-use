@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { Language, Parser, type Node } from "../vendor/web-tree-sitter/tree-sitter.js";
+import { Language, Parser, type Node } from "./vendor/web-tree-sitter/tree-sitter.js";
 
 export interface ShellCommand {
 	text: string;
@@ -22,7 +22,7 @@ await Parser.init();
 const parser = new Parser();
 parser.setLanguage(
 	await Language.load(
-		fileURLToPath(new URL("../vendor/tree-sitter-bash.wasm", import.meta.url)),
+		fileURLToPath(new URL("./vendor/tree-sitter-bash.wasm", import.meta.url)),
 	),
 );
 
