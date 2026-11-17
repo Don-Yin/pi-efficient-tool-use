@@ -36,3 +36,15 @@ const step = (name: string, args: object, at: number, result: string) => (chain.
 step("read", { path: "/tmp/shot.png" }, 0, "Open in PowerPoint");
 step("grep", { pattern: "Open in PowerPoint" }, 3_000, "src/pptx-opening.tsx:42: Open in PowerPoint");
 assert.equal(step("read", { path: "/repo/src/pptx-opening.tsx", offset: 40 }, 6_000, ""), undefined, "dependent calls are not told to batch");
+// An ignored reminder repeats on each next lone lookup, three times, then stays quiet until the next user message.
+const stubborn = new ToolUseTracker();
+const lone = (at: number, name = "read") => (stubborn.observeBatch({ role: "assistant", content: [{ type: "toolCall", name, arguments: { path: `/f${at}.txt` } }] }, at), stubborn.complete(name, 100, at + 100, ""));
+const said = Array.from({ length: 9 }, (_, index) => lone(index * 3_000));
+assert.deepEqual(said.map(text => text?.match(/singleton|again \(\d/u)?.[0]), [undefined, undefined, "singleton", "again (1", "again (2", "again (3", undefined, undefined, undefined]);
+assert.match(said[5] ?? "", /quiet until the next user message/u);
+assert.equal(stubborn.footer(), "⚒ 0/1 batched");
+stubborn.reset();
+assert.deepEqual([lone(30_000), lone(33_000), lone(36_000)].map(Boolean), [false, false, true], "a new user message starts over");
+stubborn.observeBatch({ role: "assistant", content: [{ type: "toolCall", name: "read" }, { type: "toolCall", name: "grep" }] });
+assert.equal(stubborn.footer(), "⚒ 1/2 batched", "a batch ends the repeats and counts");
+assert.equal(lone(40_000), undefined, "no repeat after a batch");

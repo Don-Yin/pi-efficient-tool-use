@@ -6,3 +6,5 @@ export const DISCOVERY = new Set(["read", "grep", "find", "ls", "symbol_search",
 
 /** How the batch reminder begins; the stats command finds past reminders by it. */
 export const BATCH_REMINDER = "efficient tool use: the last 3 singleton discovery batches";
+/** How a repeated reminder begins, after the model sent another lookup alone. */
+export const BATCH_REMINDER_AGAIN = "efficient tool use: reminder again";

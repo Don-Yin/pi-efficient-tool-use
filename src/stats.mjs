@@ -2,13 +2,17 @@
 // Does the batch reminder work for you? Reads your own Pi session files (nothing leaves the machine) and finds every
 // moment the reminder fires on: a third read-only lookup in a row sent alone. It then compares how often the model's
 // next tool batch held several calls, before the package was installed and after, per model.
-import { createReadStream, readdirSync } from "node:fs";
+import { createReadStream, existsSync, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
 import { BATCH_REMINDER, DISCOVERY } from "./discovery.js";
 
 const root = process.argv[2] ?? join(homedir(), ".pi/agent/sessions");
+if (!existsSync(root)) {
+	console.error(`No Pi sessions folder at ${root}.\nUsage: npx pi-efficient-tool-use [sessions folder, default ~/.pi/agent/sessions]`);
+	process.exit(1);
+}
 const files = readdirSync(root, { recursive: true }).filter(name => name.endsWith(".jsonl")).map(name => join(root, name));
 const text = content => Array.isArray(content) ? content.map(part => part?.type === "text" ? part.text : "").join("\n") : "";
 

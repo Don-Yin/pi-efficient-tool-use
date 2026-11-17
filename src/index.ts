@@ -110,11 +110,19 @@ export default (pi: ExtensionAPI): void => {
 		// error keeps its ASCII lines); the full output stays in its log.
 		// Once Pi has truncated (the full log exists), a run of lines that differ only in paths or numbers
 		// (rm on thousands of read-only files) is one line plus a count; a bare path list stays.
-		let bashChanged = false;
+		let changed = false;
+		// Official read decodes images only: a zip container (Word, PowerPoint, Excel, an archive) comes back as up to
+		// 50 KB of raw bytes with an invitation to page on. One line naming the converters replaces it.
+		const [first] = event.content;
+		if (event.toolName === "read" && first?.type === "text" && first.text.startsWith("PK\u0003\u0004")) {
+			const file = `'${String(event.input.path).replaceAll("'", "'\\''")}'`;
+			changed = true;
+			event = { ...event, content: [{ type: "text", text: `[Binary omitted: ${file} is a zip container (Word, PowerPoint, Excel or an archive). A Word file as text: pandoc ${file} -t plain --wrap=none; any of them: unzip -l ${file}.]` }] };
+		}
 		if (event.toolName === "bash") event = { ...event, content: event.content.map(block => {
 			const collapsed = block.type === "text" && sameShapeRuns(block.text.replace(/^.*\uFFFD.*(?:\n.*\uFFFD.*)*/gmu, run => `[non-UTF-8 output omitted: ${run.length} characters; binary or text in another encoding (e.g. a Windows code page), not empty; view with iconv or xxd]`));
 			if (!collapsed || collapsed === block.text) return block;
-			bashChanged = true;
+			changed = true;
 			return { ...block, text: collapsed };
 		}) };
 		const start = started.get(event.toolCallId);
@@ -123,10 +131,10 @@ export default (pi: ExtensionAPI): void => {
 		const timeNotice = time.complete(event.toolCallId, contentText(event.content), event.isError, Date.now());
 		if (timeNotice && ctx.hasUI) ctx.ui.notify(timeNotice, "warning");
 		const extra = [timeNotice, scriptEdits.delete(event.toolCallId) && "[Use the edit tool for source edits: it writes nothing unless every match is found.]"].filter(Boolean).map(text => ({ type: "text" as const, text: text as string }));
-		if (start === undefined) return extra.length || bashChanged ? { content: [...event.content, ...extra] } : undefined;
+		if (start === undefined) return extra.length || changed ? { content: [...event.content, ...extra] } : undefined;
 		const now = performance.now();
 		const reminder = tracker.complete(event.toolName, now - start, now, contentText(event.content));
-		if (!reminder) return extra.length || bashChanged ? { content: [...event.content, ...extra] } : undefined;
+		if (!reminder) return extra.length || changed ? { content: [...event.content, ...extra] } : undefined;
 		if (ctx.hasUI) ctx.ui.notify(reminder, "warning");
 		footer(ctx);
 		const result = toolReminder(event, "efficient-tool-use", "recent discovery tool batches", reminder);

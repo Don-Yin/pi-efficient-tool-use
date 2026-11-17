@@ -1,4 +1,6 @@
-import { BATCH_REMINDER, DISCOVERY as discovery } from "./discovery.js";
+import { BATCH_REMINDER, BATCH_REMINDER_AGAIN, DISCOVERY as discovery } from "./discovery.js";
+
+const REPEATS = 3;
 
 interface Timing {
 	name: string;
@@ -20,8 +22,12 @@ export class ToolUseTracker {
 	reminders = 0;
 	batchedAfter = 0;
 	private awaitingNext = false;
+	/** A reminder the model ignores repeats on each next lone lookup, at most this many times; then it stays quiet until the next user message. */
+	private again = 0;
+	private repeatNow = false;
+	private muted = false;
 
-	/** `⚒ 2/3 batched`: of 3 reminders, 2 were followed by a batch of several calls; undefined until the first reminder. */
+	/** `⚒ 2/3 batched`: of 3 reminders, 2 were followed by a batch of several calls before the model moved on; undefined until the first reminder. */
 	footer(): string | undefined {
 		return this.reminders ? `⚒ ${this.batchedAfter}/${this.reminders} batched` : undefined;
 	}
@@ -29,6 +35,8 @@ export class ToolUseTracker {
 	reset(): void {
 		this.streak = [];
 		this.singleton = undefined;
+		this.awaitingNext = this.repeatNow = this.muted = false;
+		this.again = 0;
 	}
 
 	observeBatch(
@@ -47,17 +55,21 @@ export class ToolUseTracker {
 				? [value.name ?? value.toolName ?? "unknown"]
 				: [];
 		});
-		// The same measure as src/stats.mjs: did the next tool batch after a reminder hold several calls?
-		if (this.awaitingNext && tools.length) {
-			if (tools.length > 1) this.batchedAfter++;
-			this.awaitingNext = false;
-		}
 		const args = message.content.flatMap(block => Object.values((block as { arguments?: object })?.arguments ?? {}));
-		if (args.some(arg => typeof arg === "string" && arg.length > 2 && this.lastResult.includes(arg.split("/").pop()!))) this.streak = [];
-		this.singleton =
-			tools.length === 1 && discovery.has(tools[0])
-				? { name: tools[0], startedAt: now }
-				: undefined;
+		const dependent = args.some(arg => typeof arg === "string" && arg.length > 2 && this.lastResult.includes(arg.split("/").pop()!));
+		if (dependent) this.streak = [];
+		const lone = tools.length === 1 && discovery.has(tools[0]);
+		// After a reminder: a batch of several calls ends it (counted), another lone lookup repeats it, a call that
+		// uses the last result waits, anything else means the model moved on.
+		if (this.awaitingNext && tools.length) {
+			this.repeatNow = lone && !dependent && this.again > 0;
+			if (tools.length > 1) this.batchedAfter++;
+			if (!this.repeatNow && !(lone && dependent)) {
+				this.awaitingNext = false;
+				this.again = 0;
+			}
+		}
+		this.singleton = lone ? { name: tools[0], startedAt: now } : undefined;
 		if (!this.singleton && tools.length) this.streak = [];
 	}
 
@@ -71,6 +83,12 @@ export class ToolUseTracker {
 		if (name !== this.singleton?.name) return;
 		const { startedAt } = this.singleton;
 		this.singleton = undefined;
+		if (this.repeatNow) {
+			this.repeatNow = false;
+			this.muted = !--this.again;
+			return `${BATCH_REMINDER_AGAIN} (${REPEATS - this.again} of ${REPEATS}): this lookup was sent alone too. If your next lookups do not need this result, send them together in one parallel tool batch; keep dependent calls serial.${this.muted ? " This reminder now stays quiet until the next user message." : ""}`;
+		}
+		if (this.muted) return;
 		this.streak.push({ name, milliseconds, startedAt });
 		if (this.streak.length < 3) return;
 		const recent = this.streak.slice(-3);
@@ -83,6 +101,7 @@ export class ToolUseTracker {
 		this.streak = [];
 		this.reminders++;
 		this.awaitingNext = true;
+		this.again = REPEATS;
 		const slowest = recent.reduce((left, right) =>
 			left.milliseconds >= right.milliseconds ? left : right,
 		);

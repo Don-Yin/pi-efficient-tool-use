@@ -124,6 +124,16 @@ test("a truncated bash result keeps one of each run of same-shape lines; untrunc
 	assert.equal(run(paths), paths, "a path list is all information");
 });
 
+test("a read of a zip container (00-ohbm-prep 11-16: a .docx) returns one line naming the converters, not its bytes", () => {
+	const hooks = new Map<string, Function>();
+	extension({ on: (name: string, fn: Function) => hooks.set(name, fn), getActiveTools: () => ["read"] } as never);
+	const read = (text: string, toolName = "read") => hooks.get("tool_result")!({ toolName, toolCallId: "r", input: { path: "a b.docx" }, content: [{ type: "text", text }] }, { hasUI: false })?.content[0].text ?? text;
+	const bytes = "PK\u0003\u0004\u0014\u0000[Content_Types].xml\n\n[Showing lines 1-89 of 8237 (50.0KB limit). Use offset=90 to continue.]";
+	assert.equal(read(bytes), "[Binary omitted: 'a b.docx' is a zip container (Word, PowerPoint, Excel or an archive). A Word file as text: pandoc 'a b.docx' -t plain --wrap=none; any of them: unzip -l 'a b.docx'.]");
+	assert.equal(read(bytes, "bash"), bytes, "only the read tool");
+	assert.equal(read("PK is a text file\u0000 with a stray NUL"), "PK is a text file\u0000 with a stray NUL", "text stays, even with a NUL byte");
+});
+
 test("a mangled name of an active tool is answered with the real name (trade-auto-t212 run-dcdze3 11-06: copy_bash)", () => {
 	const hooks = new Map<string, Function>();
 	extension({ on: (name: string, fn: Function) => hooks.set(name, fn), getActiveTools: () => ["read", "bash", "pi-mobile-share-file"] } as never);
