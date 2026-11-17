@@ -51,7 +51,7 @@ export default (pi: ExtensionAPI): void => {
 		if (!("message" in event)) time.begin(event.prompt, Date.now());
 		const { selectedTools, sections } = event.systemPromptOptions;
 		if (selectedTools.includes("grep")) {
-			sections.repository_search = "For repository source discovery, use the grep tool (gitignore-aware, bounded matches and long lines), or symbol_search for identifiers when available, instead of recursive Bash grep. Scope the known source directory rather than scanning build output, dependencies and Git metadata. Explicit inspection of generated or ignored files remains allowed: name the exact files and bound the output.";
+			sections.repository_search = `For repository source discovery, use the grep tool (gitignore-aware, bounded matches and long lines)${selectedTools.includes("symbol_search") ? ", or symbol_search for identifiers," : ""} instead of recursive Bash grep. Scope the known source directory rather than scanning build output, dependencies and Git metadata. Explicit inspection of generated or ignored files remains allowed: name the exact files and bound the output.`;
 		} else delete sections.repository_search;
 	});
 	// Inspect local executions, not quoted ssh/wsl/fleet payloads or printed examples.
@@ -133,7 +133,7 @@ export default (pi: ExtensionAPI): void => {
 		const extra = [timeNotice, scriptEdits.delete(event.toolCallId) && "[Use the edit tool for source edits: it writes nothing unless every match is found.]"].filter(Boolean).map(text => ({ type: "text" as const, text: text as string }));
 		if (start === undefined) return extra.length || changed ? { content: [...event.content, ...extra] } : undefined;
 		const now = performance.now();
-		const reminder = tracker.complete(event.toolName, now - start, now, contentText(event.content));
+		const reminder = tracker.complete(event.toolName, now - start, now, contentText(event.content), pi.getActiveTools());
 		if (!reminder) return extra.length || changed ? { content: [...event.content, ...extra] } : undefined;
 		if (ctx.hasUI) ctx.ui.notify(reminder, "warning");
 		footer(ctx);

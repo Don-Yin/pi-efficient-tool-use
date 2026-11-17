@@ -112,7 +112,7 @@ test("a single long wait that crosses several thresholds yields one notice stati
 
 test("settlement ends request timing; retries retain it, peer wakes stay quiet and new requests restart it", t => {
 	const hooks = new Map<string, Function>();
-	extension({ on: (name: string, fn: Function) => hooks.set(name, fn) } as never);
+	extension({ on: (name: string, fn: Function) => hooks.set(name, fn), getActiveTools: () => ["read", "bash"] } as never);
 	const notices: string[] = [];
 	const ctx = { hasUI: true, ui: { notify: (message: string) => notices.push(message) } };
 	let clock = 0;
@@ -166,7 +166,7 @@ test("settlement ends request timing; retries retain it, peer wakes stay quiet a
 
 test("the extension appends the notice to the tool result and shows it as a warning card, without touching other results", () => {
 	const hooks = new Map<string, Function>();
-	extension({ on: (name: string, fn: Function) => hooks.set(name, fn) } as never);
+	extension({ on: (name: string, fn: Function) => hooks.set(name, fn), getActiveTools: () => ["read", "bash"] } as never);
 	const notices: Array<[string, string?]> = [];
 	const ctx = { hasUI: true, ui: { notify: (message: string, level?: string) => notices.push([message, level]) } };
 	const realNow = Date.now; let clock = 1_000_000;
@@ -193,7 +193,7 @@ test("the extension appends the notice to the tool result and shows it as a warn
 
 test("binary bytes in a bash result collapse to one marker, keeping the text around them", () => {
 	const hooks = new Map<string, Function>();
-	extension({ on: (name: string, fn: Function) => hooks.set(name, fn) } as never);
+	extension({ on: (name: string, fn: Function) => hooks.set(name, fn), getActiveTools: () => ["read", "bash"] } as never);
 	const binary = "start\n\uFFFDPNG\uFFFD\nIHDR\n\uFFFD\uFFFDx\nmagick: unable to open image 'L.png'\nfull output: /tmp/log";
 	const result = (toolName: string) => hooks.get("tool_result")!({ toolName, toolCallId: "1", input: {}, isError: false, content: [{ type: "text", text: binary }] }, { hasUI: false });
 	const marker = (n: number) => `[non-UTF-8 output omitted: ${n} characters; binary or text in another encoding (e.g. a Windows code page), not empty; view with iconv or xxd]`;

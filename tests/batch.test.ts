@@ -48,3 +48,16 @@ assert.deepEqual([lone(30_000), lone(33_000), lone(36_000)].map(Boolean), [false
 stubborn.observeBatch({ role: "assistant", content: [{ type: "toolCall", name: "read" }, { type: "toolCall", name: "grep" }] });
 assert.equal(stubborn.footer(), "⚒ 1/2 batched", "a batch ends the repeats and counts");
 assert.equal(lone(40_000), undefined, "no repeat after a batch");
+
+// The reminder names structured readers only when the session has them.
+const remind = (active: string[]) => {
+	const t = new ToolUseTracker();
+	const lone = (name: string, at: number) => (t.observeBatch({ role: "assistant", content: [{ type: "toolCall", name }] }, at), t.complete(name, 100, at + 100, "", active));
+	lone("read", 0);
+	lone("grep", 3_000);
+	return lone("read", 6_000) ?? "";
+};
+assert.match(remind(["read", "grep", "bash"]), /prefer reads with explicit limits;/);
+assert.doesNotMatch(remind(["read", "grep", "bash"]), /module_report|read_symbol/);
+assert.match(remind(["read", "module_report", "read_symbol"]), /prefer module_report, read_symbol, reads with explicit limits;/);
+assert.match(remind(["read", "read_symbol"]), /prefer read_symbol, reads with explicit limits;/);
