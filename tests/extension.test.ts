@@ -61,12 +61,12 @@ test("source-search guidance reaches the structured prompt before discovery", ()
 	const hooks = new Map<string, Function>();
 	const tools = ["bash", "grep"];
 	extension({ on: (name: string, fn: Function) => hooks.set(name, fn), getActiveTools: () => tools } as never);
-	const options = { selectedTools: ["read", "bash", "grep"], sections: { existing: "preserve other guidance" } as Record<string, string> };
+	const options = { selectedTools: ["read", "bash", "grep", "symbol_search"], sections: { existing: "preserve other guidance" } as Record<string, string> };
 	const begin = () => hooks.get("before_agent_start")!({ prompt: "Find the manager-sheet reopen bug", systemPromptOptions: options });
 	assert.equal(begin(), undefined, "no whole-prompt replacement or follow-up message");
 	const prompt = options.sections.repository_search!;
 	assert.match(prompt, /use the grep tool.*gitignore-aware.*bounded matches and long lines/u);
-	assert.match(prompt, /symbol_search for identifiers when available, instead of recursive Bash grep/u);
+	assert.match(prompt, /or symbol_search for identifiers, instead of recursive Bash grep/u);
 	assert.match(prompt, /Scope the known source directory/u);
 	assert.match(prompt, /Explicit inspection of generated or ignored files remains allowed/u);
 	assert.match(prompt, /name the exact files and bound the output/u);
@@ -152,4 +152,13 @@ test("a script that rewrites source files is pointed to the edit tool (workflow-
 	assert.match(run("node -e \"let s=fs.readFileSync('a.tsx','utf8');s=s.replace(x,y);fs.writeFileSync('a.tsx',s)\""), /edit tool/u);
 	assert.match(run("sed -i '' 's/a/b/' src/app.py"), /edit tool/u);
 	for (const command of ["sed -i '' 's/a/b/' data.csv", "node -e \"fs.writeFileSync('out.json', JSON.stringify(x))\""]) assert.doesNotMatch(run(command), /edit tool/u, command);
+});
+
+test("source-search guidance names symbol_search only when that tool is selected", () => {
+	const hooks = new Map<string, Function>();
+	extension({ on: (name: string, fn: Function) => hooks.set(name, fn), getActiveTools: () => ["bash", "grep"] } as never);
+	const options = { selectedTools: ["read", "bash", "grep"], sections: {} as Record<string, string> };
+	hooks.get("before_agent_start")!({ prompt: "Find the bug", systemPromptOptions: options });
+	assert.match(options.sections.repository_search!, /use the grep tool \(gitignore-aware, bounded matches and long lines\) instead of recursive Bash grep/u);
+	assert.doesNotMatch(options.sections.repository_search!, /symbol_search/u);
 });

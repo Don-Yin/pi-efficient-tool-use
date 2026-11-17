@@ -1,6 +1,8 @@
 import { BATCH_REMINDER, BATCH_REMINDER_AGAIN, DISCOVERY as discovery } from "./discovery.js";
 
 const REPEATS = 3;
+/** Bounded readers the batch reminder recommends when they are active. */
+const STRUCTURED_READERS = ["module_report", "read_symbol"];
 
 interface Timing {
 	name: string;
@@ -78,6 +80,7 @@ export class ToolUseTracker {
 		milliseconds: number,
 		now = performance.now(),
 		result = "",
+		activeTools: readonly string[] = [],
 	): string | undefined {
 		if (discovery.has(name)) this.lastResult = result;
 		if (name !== this.singleton?.name) return;
@@ -111,6 +114,8 @@ export class ToolUseTracker {
 					`${tool} ${(ms / 1_000).toFixed(1)}s`,
 			)
 			.join(", ");
-		return `${BATCH_REMINDER} spanned ${(elapsed / 1_000).toFixed(1)}s wall-clock (${(toolTotal / 1_000).toFixed(1)}s cumulative tool runtime: ${detail}); slowest: ${slowest.name} ${(slowest.milliseconds / 1_000).toFixed(1)}s. batch at most 3 independent, bounded discovery calls in one parallel tool batch to reduce serial latency; prefer module_report, read_symbol, and reads with explicit limits; never batch unbounded full-file reads. this does not imply cpu multithreading; keep dependent calls serial.`;
+		// Name only the structured readers this session actually has; others would invite calls to missing tools.
+		const prefer = [...STRUCTURED_READERS.filter((tool) => activeTools.includes(tool)), "reads with explicit limits"];
+		return `${BATCH_REMINDER} spanned ${(elapsed / 1_000).toFixed(1)}s wall-clock (${(toolTotal / 1_000).toFixed(1)}s cumulative tool runtime: ${detail}); slowest: ${slowest.name} ${(slowest.milliseconds / 1_000).toFixed(1)}s. batch at most 3 independent, bounded discovery calls in one parallel tool batch to reduce serial latency; prefer ${prefer.join(", ")}; never batch unbounded full-file reads. this does not imply cpu multithreading; keep dependent calls serial.`;
 	}
 }
