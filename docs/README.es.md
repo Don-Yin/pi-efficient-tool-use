@@ -6,6 +6,10 @@ Recuerda a un agente de [Pi](https://github.com/earendil-works/pi) que envíe ju
 
 <p align="center"><img src="../assets/demo.png" alt="A real Pi session: three files read one at a time, the reminder, then three files read together in one turn; the footer shows ⚒ 1/1 batched" width="70%"></p>
 
+https://github.com/user-attachments/assets/e4a9c709-f00f-43d9-b4b6-634a06507758
+
+También en [YouTube](https://youtu.be/44regQgCahw).
+
 ```bash
 pi install npm:pi-efficient-tool-use
 ```
@@ -21,9 +25,7 @@ pi install npm:pi-efficient-tool-use
 
 ## ¿Funciona?
 
-Un poco. En mis propios registros de Pi, en el momento en que salta el recordatorio (tres búsquedas sueltas seguidas), gpt-5.6-sol envió varias llamadas en su siguiente lote el 13% de las veces antes de instalarlo y el 30% tras un recordatorio. Cinco lotes después la diferencia desaparece: el modelo se olvida. En una semana eso supone alrededor de 1 hora de espera ahorrada, de un máximo de 19 horas que podría ahorrar agrupar llamadas.
-
-<p align="center"><img src="../assets/effect.png" alt="Next batch 13% before install vs 30% after a reminder; next five batches 22% vs 24%; about 1.1 of at most 19.2 hours saved per week" width="100%"></p>
+Un poco. En mis propios registros de Pi, en el momento en que salta el recordatorio (tres búsquedas sueltas seguidas), gpt-5.6-sol envió varias llamadas en su siguiente lote el 13% de las veces antes de instalarlo y el 30% tras un recordatorio. En una semana eso supone alrededor de 1 hora de espera ahorrada.
 
 ## Compruébalo con tus propios registros
 

@@ -1,7 +1,6 @@
 {
 	"name": "pi-efficient-tool-use",
-	"version": "0.0.0",
-	"private": true,
+	"version": "0.1.0",
 	"description": "Pi extension that reminds the agent to batch independent lookups, shows how often that worked, and fixes a few wasteful tool calls where they happen.",
 	"license": "MIT",
 	"author": "Don Yin",

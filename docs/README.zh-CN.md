@@ -6,6 +6,10 @@
 
 <p align="center"><img src="../assets/demo.png" alt="A real Pi session: three files read one at a time, the reminder, then three files read together in one turn; the footer shows ⚒ 1/1 batched" width="70%"></p>
 
+https://github.com/user-attachments/assets/e4a9c709-f00f-43d9-b4b6-634a06507758
+
+也可以在 [YouTube](https://youtu.be/44regQgCahw) 上观看。
+
 ```bash
 pi install npm:pi-efficient-tool-use
 ```
@@ -21,9 +25,7 @@ pi install npm:pi-efficient-tool-use
 
 ## 有用吗？
 
-有一点。在我自己的 Pi 日志里，到了提醒触发的时刻（连续三次单独查找），gpt-5.6-sol 下一批同时发多个调用的比例，安装前是 13%，收到提醒后是 30%。再往后 5 批，两者就没有差别了：模型会忘。按一周算，大约省下 1 小时的等待，而合并调用最多能省 19 小时。
-
-<p align="center"><img src="../assets/effect.png" alt="Next batch 13% before install vs 30% after a reminder; next five batches 22% vs 24%; about 1.1 of at most 19.2 hours saved per week" width="100%"></p>
+有一点。在我自己的 Pi 日志里，到了提醒触发的时刻（连续三次单独查找），gpt-5.6-sol 下一批同时发多个调用的比例，安装前是 13%，收到提醒后是 30%。按一周算，大约省下 1 小时的等待。
 
 ## 在自己的日志上验证
 

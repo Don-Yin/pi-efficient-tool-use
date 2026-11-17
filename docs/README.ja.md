@@ -6,6 +6,10 @@
 
 <p align="center"><img src="../assets/demo.png" alt="A real Pi session: three files read one at a time, the reminder, then three files read together in one turn; the footer shows ⚒ 1/1 batched" width="70%"></p>
 
+https://github.com/user-attachments/assets/e4a9c709-f00f-43d9-b4b6-634a06507758
+
+[YouTube](https://youtu.be/44regQgCahw) でも見られます。
+
 ```bash
 pi install npm:pi-efficient-tool-use
 ```
@@ -21,9 +25,7 @@ pi install npm:pi-efficient-tool-use
 
 ## 効果はある？
 
-少しだけ。私自身の Pi ログでは、リマインダーが出る場面（単独の検索が 3 回続いたとき）で、gpt-5.6-sol が次のバッチで複数の呼び出しを送った割合は、導入前が 13%、リマインダー後が 30% でした。5 バッチ後には差がなくなります。モデルが忘れるからです。1 週間で見ると、まとめ送りで最大 19 時間減らせる待ち時間のうち、約 1 時間を減らせた計算です。
-
-<p align="center"><img src="../assets/effect.png" alt="Next batch 13% before install vs 30% after a reminder; next five batches 22% vs 24%; about 1.1 of at most 19.2 hours saved per week" width="100%"></p>
+少しだけ。私自身の Pi ログでは、リマインダーが出る場面（単独の検索が 3 回続いたとき）で、gpt-5.6-sol が次のバッチで複数の呼び出しを送った割合は、導入前が 13%、リマインダー後が 30% でした。1 週間で見ると、約 1 時間の待ち時間を減らせた計算です。
 
 ## 自分のログで確かめる
 

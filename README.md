@@ -6,6 +6,10 @@ Reminds a [Pi](https://github.com/earendil-works/pi) agent to send independent l
 
 <p align="center"><img src="assets/demo.png" alt="A real Pi session: three files read one at a time, the reminder, then three files read together in one turn; the footer shows ⚒ 1/1 batched" width="70%"></p>
 
+https://github.com/user-attachments/assets/e4a9c709-f00f-43d9-b4b6-634a06507758
+
+Also on [YouTube](https://youtu.be/44regQgCahw).
+
 ```bash
 pi install npm:pi-efficient-tool-use
 ```
@@ -21,9 +25,7 @@ pi install npm:pi-efficient-tool-use
 
 ## Does it work?
 
-A little. In my own Pi logs, at the moment the reminder fires (three lone lookups in a row), gpt-5.6-sol sent several calls in its next batch 13% of the time before I installed it and 30% after a reminder. Five batches later the difference is gone: the model forgets. Over a week that is about 1 hour of waiting saved, out of at most 19 hours that batching could save.
-
-<p align="center"><img src="assets/effect.png" alt="Next batch 13% before install vs 30% after a reminder; next five batches 22% vs 24%; about 1.1 of at most 19.2 hours saved per week" width="100%"></p>
+A little. In my own Pi logs, at the moment the reminder fires (three lone lookups in a row), gpt-5.6-sol sent several calls in its next batch 13% of the time before I installed it and 30% after a reminder. Over a week that is about 1 hour of waiting saved.
 
 ## Check on your own logs
 
